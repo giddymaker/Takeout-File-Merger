@@ -22,28 +22,32 @@ def merge_takeout_folders(base_dir, output_dir):
 
         for takeout_folder in takeout_folders:
             print(f"Processing Takeout folder: {takeout_folder}")
-            drive_path = takeout_folder / "Drive"
-            if not drive_path.exists():
-                print(f"Skipping folder (no 'Drive' subdirectory): {takeout_folder}")
-                continue
             
-            for item in drive_path.rglob('*'):
-                relative_path = item.relative_to(drive_path)
-                dest_path = output_path / relative_path
+            # Process both "Drive" and "Google Photos" subdirectories
+            for subfolder in ["Drive", "Google Photos"]:
+                subfolder_path = takeout_folder / subfolder
+                if not subfolder_path.exists():
+                    print(f"Skipping folder (no '{subfolder}' subdirectory): {takeout_folder}")
+                    continue
                 
-                try:
-                    if item.is_dir():
-                        print(f"Creating directory: {dest_path}")
-                        dest_path.mkdir(parents=True, exist_ok=True)
-                    else:
-                        print(f"Moving file: {item} -> {dest_path}")
-                        dest_path.parent.mkdir(parents=True, exist_ok=True)
-                        if not dest_path.exists():
-                            shutil.move(str(item), str(dest_path))
+                print(f"Processing '{subfolder}' subdirectory in: {takeout_folder}")
+                for item in subfolder_path.rglob('*'):
+                    relative_path = item.relative_to(subfolder_path)
+                    dest_path = output_path / subfolder / relative_path
+                    
+                    try:
+                        if item.is_dir():
+                            print(f"Creating directory: {dest_path}")
+                            dest_path.mkdir(parents=True, exist_ok=True)
                         else:
-                            print(f"Skipping existing file: {dest_path}")
-                except Exception as e:
-                    print(f"Error processing item: {item}. Error: {e}")
+                            print(f"Moving file: {item} -> {dest_path}")
+                            dest_path.parent.mkdir(parents=True, exist_ok=True)
+                            if not dest_path.exists():
+                                shutil.move(str(item), str(dest_path))
+                            else:
+                                print(f"Skipping existing file: {dest_path}")
+                    except Exception as e:
+                        print(f"Error processing item: {item}. Error: {e}")
         
         print("Merge completed successfully.")
     except Exception as e:
