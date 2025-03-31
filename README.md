@@ -1,2 +1,4 @@
 # Takeout-File-Merger
-Simply python script to merge Google Takeout directories and files.
+Simple python script to merge Google Takeout directories and files.
+
+see --help for help
